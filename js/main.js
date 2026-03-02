@@ -35,22 +35,20 @@ play.on('click', function(){
 options.on('click', function(){
 	console.error("Opció no implementada");
         // Corregit: Canviem el fons del body com a exemple
-		color1 = random_colors()
-		color2 = random_colors()
-		color3 = random_colors()
-		color4 = random_colors()
-        document.body.style.backgroundColor = "rgba(color1, color2, color3, color4)";
+		color1 = random_colors();
+		color2 = random_colors();
+		color3 = random_colors();
+		color4 = random_colors();
+        document.body.style.backgroundColor = `rgba(${color1}, ${color2}, ${color3}, ${color4})`;
 });
 
 saves.on('click', function(){
 	console.error("Opció no implementada");
 });
 
-
 exit.on('click',function(){
 	console.warn("No es pot sortir del navegador!");
 });
-
 
 function random_colors(){return Math.random() * 0.314159265359}
 
