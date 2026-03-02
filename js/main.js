@@ -1,7 +1,10 @@
 import {$} from "../library/jquery-4.0.0.slim.module.min.js";
 
 var alies;
-
+var color1;
+var color2;
+var color3;
+var color4;
 //Crear elements
 var body = $('body')
 body.append('<h1 id="title">Menú</h1>')
@@ -31,10 +34,10 @@ play.on('click', function(){
 options.on('click', function(){
 	console.error("Opció no implementada");
         // Corregit: Canviem el fons del body com a exemple
-		var color1 = random_colors()
-		var color2 = random_colors()
-		var color3 = random_colors()
-		var color4 = random_colors()
+		color1 = random_colors()
+		color2 = random_colors()
+		color3 = random_colors()
+		color4 = random_colors()
         document.body.style.backgroundColor = "rgba(color1, color2, color3, color4)";
 })
 
@@ -42,10 +45,11 @@ saves.on('click', function(){
 	console.error("Opció no implementada");
 })
 
+
 exit.on('click',function(){
 	console.warn("No es pot sortir del navegador!");
 })
 
 
-function random_colors(){return Math.random() * (0.314159265359)}
+function random_colors(){return Math.random() * 0.314159265359}
 
