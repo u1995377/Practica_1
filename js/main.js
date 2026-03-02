@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 window.addEventListener('load', function() {
     var alies;
 
@@ -13,9 +12,6 @@ window.addEventListener('load', function() {
         } else {
             console.warn("No s'ha introduït cap àlies.");
         }
-=======
-
->>>>>>> a6bfe7e235536e588fbf9c8f92141c4ece03bc9b
     });
 
     // Botó Opcions
