@@ -30,7 +30,7 @@ export function startGame(){
         setTimeout(function(){
             game.ready++;
             goBack(indx);
-        }, 1000 + 100 * indx);
+        }, 100 * indx);
     });
 }
 
@@ -60,8 +60,10 @@ export function clickCard(indx){
 }
 
 function goBack(idx){
-    setValue(idx, back);
+	setTimeout(function(){
+		setValue(idx, back);
     clickOn(idx);
+	}, 1000);
 }
 
 function goFront(idx){
