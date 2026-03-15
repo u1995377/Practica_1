@@ -8,7 +8,7 @@ selectCards();
 items.forEach(function (value, idx)
 {
     // Hem afegit class="card"
-    game.append(`<img id="${idx}" class="card" title="card">`); 
+	game.append(`<img id="${idx}" class="card" title="card">`); 
     cards.push($(`#${idx}`));
     setValue(idx, value);
 });
