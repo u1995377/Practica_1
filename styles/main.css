@@ -21,3 +21,21 @@ button.center{
 	text-align: center;
 }
 
+#game-container {
+    display: flex;          /* Activem el mode flexible */
+    flex-wrap: wrap;        /* Si no caben en una fila, baixen a la següent */
+    justify-content: center; /* Centra les cartes horitzontalment */
+    align-items: center;     /* Centra les cartes verticalment */
+    gap: 15px;              /* Espai entre les cartes */
+    padding: 20px;
+    max-width: 1000px;      /* Opcional: amplada màxima del tauler */
+    margin: 0 auto;         /* Centra el tauler a la pantalla */
+}
+
+/* Estil per a les cartes que genera el teu JS */
+.card {
+    width: 100px;           /* Ajusta la mida segons vulguis */
+    height: 140px;
+    background-color: #ccc; /* Per poder-les veure mentre proves */
+    border-radius: 8px;
+}
