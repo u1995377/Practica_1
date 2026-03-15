@@ -1,41 +1,43 @@
-body{
-	background-color: blue;
+body {
+    background-color: blue;
 }
 
-
-
-#title, .center{
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
+#title, .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-button.center{
-	width: 6rem;
-	height: 3rem;
-	margin-top: 1rem;
+button.center {
+    width: 6rem;
+    height: 3rem;
+    margin-top: 1rem;
 }
 
-#title{
-	color:red;
-	text-align: center;
+#title {
+    color: red;
+    text-align: center;
 }
 
-#game-container {
-    display: flex;          /* Activem el mode flexible */
-    flex-wrap: wrap;        /* Si no caben en una fila, baixen a la següent */
-    justify-content: center; /* Centra les cartes horitzontalment */
-    align-items: center;     /* Centra les cartes verticalment */
-    gap: 15px;              /* Espai entre les cartes */
+/* CANVI: Fem servir #game perquè és l'ID que tens a l'HTML i al JS */
+#game {
+    display: flex;          
+    flex-wrap: wrap;        
+    justify-content: center; 
+    align-items: center;     
+    gap: 15px;              
     padding: 20px;
-    max-width: 1000px;      /* Opcional: amplada màxima del tauler */
-    margin: 0 auto;         /* Centra el tauler a la pantalla */
+    max-width: 1000px;      
+    margin: 0 auto;         
 }
 
-/* Estil per a les cartes que genera el teu JS */
-.card {
-    width: 100px;           /* Ajusta la mida segons vulguis */
+/* CANVI: Com que el teu JS genera <img> dins de #game, 
+   els donem estil directament */
+#game img {
+    width: 100px;           
     height: 140px;
-    background-color: #ccc; /* Per poder-les veure mentre proves */
+    background-color: #ccc; 
     border-radius: 8px;
+    cursor: pointer;
+    object-fit: cover; /* Perquè la imatge no es deformi */
 }
