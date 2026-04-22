@@ -52,7 +52,7 @@ saves.on('click', function(){
             return;
         }
         sessionStorage.load = to_load;
-        window.location.assign("./html/game.html");
+        window.location.assign("./html/canvasgame.html");
 });
 
 exit.on('click',function(){
