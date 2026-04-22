@@ -17,6 +17,7 @@ var game = {
     lastCard: null,
     score: 200,
     pairs: 2,
+	groupSize: 2,
     goBack: function(idx){
         this.setValue && this.setValue[idx](back);
         this.states[idx] = StateCard.ENABLE;
@@ -33,12 +34,19 @@ var game = {
             this.lastCard = toLoad.lastCard;
             this.score = toLoad.score;
             this.pairs = toLoad.pairs;
+			this.groupSize = toLoad.groupSize;
         }
         else{ // Nova partida
             this.items = resources.slice();          
             shuffe(this.items);                      
             this.items = this.items.slice(0, this.pairs); 
-            this.items = this.items.concat(this.items);        
+            let tauler = [];
+			this.items.forEach(model => {
+				for (let i = 0; i < this.groupSize; i++) {
+					tauler.push(model);
+				}
+			});
+			this.items = tauler;        
             shuffe(this.items);
             this.states = new Array(this.items.length);
         }
