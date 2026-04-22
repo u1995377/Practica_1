@@ -14,7 +14,7 @@ var game = {
     states: [],
     setValue: null,
     ready: 0,
-    lastCard: null,
+    selectedCards: [],
     score: 200,
     pairs: 2,
 	groupSize: 2,
@@ -31,7 +31,8 @@ var game = {
             let toLoad = JSON.parse(sessionStorage.load);
             this.items = toLoad.items;
             this.states = toLoad.states;
-            this.lastCard = toLoad.lastCard;
+            this.selectedCards = toLoad.lastCard || []; 
+			this.groupSize = toLoad.groupSize || 2;
             this.score = toLoad.score;
             this.pairs = toLoad.pairs;
 			this.groupSize = toLoad.groupSize;
@@ -67,36 +68,65 @@ var game = {
     },
     click: function(indx){
         if (this.states[indx] !== StateCard.ENABLE || this.ready < this.items.length) return;
-        this.goFront(indx);
-        if (this.lastCard === null) this.lastCard = indx; // Primera carta clicada
-        else{ // Teníem carta prèvia
-            if (this.items[this.lastCard] === this.items[indx]){
-                this.pairs--;
-                this.states[this.lastCard] = this.states[indx] = StateCard.DONE;
-                if (this.pairs <= 0){
-                    alert(`Has guanyat amb ${this.score} punts!!!!`);
-                    window.location.assign("../");
-                }
-            }
-            else {
-                this.goBack(indx);
-                this.goBack(this.lastCard);
-                this.score -= 25;
-                if (this.score <= 0){
-                    alert ("Has perdut");
-                    window.location.assign("../");
-                }
-            }
-            this.lastCard = null;
-        }
-    },
+        // Dins de click(indx):
+		this.goFront(indx);
+
+		if (this.selectedCards.length === 0) {
+			this.selectedCards.push(indx);
+		} else {
+			let primeraCartaIdx = this.selectedCards[0];
+			if (this.items[indx] === this.items[primeraCartaIdx]) {
+				// Són iguals, la guardem
+				this.selectedCards.push(indx);
+				
+				// Està el grup complet?
+				if (this.selectedCards.length === this.groupSize) {
+					// ÈXIT: Marcar totes com a DONE i buidar array
+					this.selectedCards.forEach(i => this.states[i] = StateCard.DONE);
+					this.pairs--;
+					this.selectedCards = [];
+					if (this.pairs <= 0){
+						alert(`Has guanyat amb ${this.score} punts!!!!`);
+						window.location.assign("../");
+					}
+				}
+			}
+			else { 
+				// ERROR: No són iguals
+				this.ready = 0; // Bloquegem el clic perquè no es puguin girar més cartes durant el delay
+
+				// Guardem la carta actual per girar-la també, ja que encara no és a l'array
+				this.selectedCards.push(indx);
+
+				// Donem mig segon perquè l'usuari vegi l'error
+				setTimeout(() => {
+					// 1. Fem goBack de TOTES les cartes que teníem seleccionades
+					this.selectedCards.forEach(i => {
+						this.goBack(i);
+					});
+
+					// 2. Restar punts
+					this.score -= 25;
+					if (this.score <= 0) {
+						alert("Has perdut");
+						window.location.assign("../");
+					}
+
+					// 3. Buidar array i desbloquejar el joc
+					this.selectedCards = [];
+					this.ready = this.items.length; 
+				}, 500);
+			}
+		}
+	},
     save: function(){
         let to_save = JSON.stringify({
             items: this.items,
             states: this.states,
-            lastCard: this.lastCard,
+            lastCard: this.selectedCards, 
+			groupSize: this.groupSize,
             score: this.score,
-            pairs: this.pairs
+            pairs: this.pairs,
         });
         let ret = false;
         fetch('../php/save.php', {
@@ -112,7 +142,7 @@ var game = {
             localStorage.save = to_save;
         }
         window.location.assign("../");
-    }
+    },
 }
 
 function shuffe(arr){

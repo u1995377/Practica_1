@@ -12,7 +12,7 @@ function prepareGame(mode) {
     sessionStorage.setItem('groupSize', groupSize);
 
     // 4. Anem al joc
-    window.location.assign("./game.html");
+    window.location.assign("./canvasgame.html");
 }
 
 $('#gamemode1').on('click', function() {

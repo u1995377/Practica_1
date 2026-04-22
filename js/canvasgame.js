@@ -22,21 +22,40 @@ function start(){
     selectCards();
     cards = gameItems.map((c)=>{return {texture:c}});
     loadCardResource("../resources/back.png");
+
+    // Definim quantes columnes volem (per exemple 6)
+    const columnes = 6;
+    const margreX = 10;
+    const margreY = 10;
+
     cards.forEach((card, indx) => {
         loadCardResource(card.texture);
-        initCard(val => card.texture = val);
+        
+        // CORRECCIÓ: Necessitem que el callback actualitzi la carta específica
+        initCard(val => {
+            // Busquem quina carta de l'array de memòria correspon a aquest callback
+            // (A memory.js el setValue es va omplint en ordre)
+            cards[indx].texture = val;
+        });
+
+        // CALCULEM FILA I COLUMNA
+        let col = indx % columnes;
+        let fila = Math.floor(indx / columnes);
+
         card.position = {
-            xMin: 2+100*indx,
-            xMax: 2+100*indx + c_w,
-            yMin: 0,
-            yMax: c_h
+            xMin: margreX + (c_w + 10) * col,
+            xMax: margreX + (c_w + 10) * col + c_w,
+            yMin: margreY + (c_h + 10) * fila,
+            yMax: margreY + (c_h + 10) * fila + c_h
         }
+
         card.onClick = function(x, y){
             return x >= this.position.xMin && x <= this.position.xMax &&
-                    y >= this.position.yMin && y <= this.position.yMax;
+                   y >= this.position.yMin && y <= this.position.yMax;
         }
     });
-    // Vincular events
+
+    // Vincular events (el teu codi de click i keydown segueix igual...)
     game.on('click', function(e){
         e_click.click = true;
         e_click.x = e.pageX - this.offsetLeft;
