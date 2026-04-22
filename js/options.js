@@ -21,7 +21,7 @@ var options = function(){
     difficulty.val(options.difficulty);
 
     pairs.on('change', function (){
-        options.pairs = pairs.val();
+        options.pairs = parseInt(pairs.val());
     });
 
     difficulty.on('change', function (){

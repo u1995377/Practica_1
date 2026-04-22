@@ -1,23 +1,36 @@
-// 1. Posem un log ABANS de l'import per veure si el fitxer respira
-console.log("Iniciant càrrega de SelectGame.js...");
-
-// 2. Intentem l'import (REVISA MOLT BÉ AQUESTA RUTA)
 import {$} from "../library/jquery-4.0.0.slim.module.min.js";
 
-// 3. Si l'import falla, aquest log NO sortirà mai
-console.log("JQuery importat correctament!");
-
-$(document).ready(function() {
-    console.log("DOM preparat");
+function prepareGame(mode){
+    sessionStorage.removeItem('load');
     
-    function prepareGame(mode) {
-        const groupSize = $('#group').val();
-        sessionStorage.setItem('mode', mode);
-        sessionStorage.setItem('groupSize', groupSize);
-        // Intentem anar directament al fitxer
-        window.location.href = "canvasgame.html";
+    // 1. Llegim el que l'usuari va decidir a Options
+    let userOptions = { pairs: 2, difficulty: 'normal' }; // Valors per defecte
+    if (localStorage.options) {
+        userOptions = JSON.parse(localStorage.options);
     }
 
-    $('#gamemode1').on('click', () => prepareGame('1'));
-    $('#gamemode2').on('click', () => prepareGame('2'));
+    // 2. Agafem el groupSize (parelles, trios...) del selector de la pantalla actual
+    const groupSize = $('#group').val();
+
+    // 3. Passem tota la configuració al sessionStorage pel joc
+    sessionStorage.setItem('mode', mode);
+    sessionStorage.setItem('groupSize', groupSize);
+    sessionStorage.setItem('pairs', userOptions.pairs); // <--- AQUÍ USEM LES OPCIONS
+    sessionStorage.setItem('difficulty', userOptions.difficulty);
+
+    window.location.assign("./canvasgame.html");
+}
+
+$(document).ready(function() {
+    console.log("JQuery a punt, vinculant botons...");
+
+    $('#gamemode1').on('click', function() {
+        console.log("Has clicat el Mode 1");
+        prepareGame('1');
+    });
+
+    $('#gamemode2').on('click', function() {
+        console.log("Has clicat el Mode 2");
+        prepareGame('2');
+    });
 });

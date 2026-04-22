@@ -38,19 +38,29 @@ var game = {
 			this.groupSize = toLoad.groupSize;
         }
         else{ // Nova partida
-            this.items = resources.slice();          
-            shuffe(this.items);                      
-            this.items = this.items.slice(0, this.pairs); 
-            let tauler = [];
-			this.items.forEach(model => {
+			// 1. Llegim la configuració que ve de SelectGame
+			this.groupSize = parseInt(sessionStorage.getItem('groupSize')) || 2;
+			this.pairs = parseInt(sessionStorage.getItem('pairs')) || 2; 
+			
+			// 2. Preparem els models de cartes segons 'this.pairs'
+			let modelsDisponibles = resources.slice(); // ['cb.png', 'co.png', etc.]
+			shuffe(modelsDisponibles);
+			
+			// Agafem només la quantitat que el jugador ha demanat a options
+			let seleccionats = modelsDisponibles.slice(0, this.pairs);
+
+			// 3. Creem el tauler multiplicant cada model pel groupSize
+			let tauler = [];
+			seleccionats.forEach(model => {
 				for (let i = 0; i < this.groupSize; i++) {
 					tauler.push(model);
 				}
 			});
-			this.items = tauler;        
-            shuffe(this.items);
-            this.states = new Array(this.items.length);
-        }
+
+			this.items = tauler;
+			shuffe(this.items);
+			this.states = new Array(this.items.length).fill(StateCard.ENABLE);
+		}
     },
     start: function(){
         this.items.forEach((_,indx)=>{
