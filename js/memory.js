@@ -16,7 +16,8 @@ var game = {
     setValue: null,
     ready: 0,
     selectedCards: [],
-    score: 200,
+    score: 0,
+    lives: 3,
     pairs: 2,
     groupSize: 2,
     mode: "normal", 
@@ -37,86 +38,90 @@ var game = {
     },
 
     upgradeDifficulty: function() {
-		this.level++;
-		
-		// Pugem el número de parelles (o grups)
-		// Posem un límit de 15 grups per no saturar el canvas
-		if (this.pairs < 15) {
-			this.pairs++; 
-		}
+        this.level++;
+        if (this.mode === "infinite") this.score += (this.level * 50);
 
-		// Cada 3 nivells, si encara som en parelles, podem pujar a trios (opcional)
-		if (this.level % 3 === 0 && this.groupSize < 3) {
-			// Si pugem el groupSize, baixem una mica les pairs perquè no hi hagi massa cartes de cop
-			this.groupSize++;
-			this.pairs = Math.max(3, this.pairs - 2); 
-		}
+        if (this.pairs < 15) this.pairs++; 
+        if (this.level % 3 === 0 && this.groupSize < 3) {
+            this.groupSize++;
+            this.pairs = Math.max(3, this.pairs - 2); 
+        }
+        this.visualTime = Math.max(200, this.visualTime - 100);
+    },
 
-		this.visualTime = Math.max(200, this.visualTime - 100);
-		this.score += 100;
-		
-		console.log(`--- NIVELL ${this.level} ---`);
-		console.log(`Pairs: ${this.pairs}, GroupSize: ${this.groupSize}`);
-	},
+    // FUNCIÓ DE GUARDAT LOCAL
+    save: function() {
+        let estatAConservar = {
+            items: this.items,
+            states: this.states,
+            score: this.score,
+            lives: this.lives,
+            pairs: this.pairs,
+            groupSize: this.groupSize,
+            mode: this.mode,
+            level: this.level,
+            visualTime: this.visualTime,
+            initialized: true
+        };
+        localStorage.setItem('memory_save_game', JSON.stringify(estatAConservar));
+        alert("Partida guardada a sobre de l'anterior!");
+    },
 
     select: function() {
-		this.setValue = []; 
+        this.setValue = []; 
+        
+        // SISTEMA DE CÀRREGA
+        if (sessionStorage.getItem('load')) {
+            let toLoad = JSON.parse(sessionStorage.getItem('load'));
+            // Substituïm totes les propietats de 'game' per les guardades
+            Object.assign(this, toLoad);
+            sessionStorage.removeItem('load'); // Netegem després de carregar
+        } else {
+            // Inicialització normal si no hi ha càrrega
+            if (!this.initialized) {
+                const modeLlegit = sessionStorage.getItem('gameMode');
+                this.mode = modeLlegit === "infinite" ? "infinite" : "normal";
+                this.initialized = true; 
+            }
 
-		if (!this.initialized) {
-			const modeLlegit = sessionStorage.getItem('gameMode');
-			this.mode = modeLlegit === "infinite" ? "infinite" : "normal";
-			this.initialized = true; 
-		}
+            if (this.mode === "normal") {
+                this.groupSize = parseInt(sessionStorage.getItem('groupSize')) || 2;
+                this.pairs = parseInt(sessionStorage.getItem('pairs')) || 2;
+                this.score = 200; 
+            } else if (this.level === 1) {
+                this.pairs = 2;
+                this.groupSize = 2;
+                this.score = 0;
+                this.lives = 3;
+            }
 
-		if (sessionStorage.load) {
-			// ... (codi de càrrega igual)
-		} else {
-			if (this.mode === "normal") {
-				this.groupSize = parseInt(sessionStorage.getItem('groupSize')) || 2;
-				this.pairs = parseInt(sessionStorage.getItem('pairs')) || 2;
-			} else if (this.level === 1) {
-				this.pairs = 2;
-				this.groupSize = 2;
-				this.score = 500;
-			}
+            const modelsDisponibles = [
+                { shape: 'c', color: '#3498db' }, { shape: 'c', color: '#e74c3c' },
+                { shape: 's', color: '#2ecc71' }, { shape: 's', color: '#f1c40f' },
+                { shape: 't', color: '#9b59b6' }, { shape: 't', color: '#e67e22' },
+                { shape: 'c', color: '#1abc9c' }, { shape: 's', color: '#34495e' },
+                { shape: 't', color: '#d35400' }, { shape: 's', color: '#7f8c8d' },
+                { shape: 'c', color: '#ff00ff' }, { shape: 's', color: '#00ffff' },
+                { shape: 't', color: '#ffffff' }, { shape: 'c', color: '#000000' }
+            ];
 
-			// Llista de models (assegura't que n'hi hagi prou!)
-			const modelsDisponibles = [
-				{ shape: 'c', color: '#3498db' }, { shape: 'c', color: '#e74c3c' },
-				{ shape: 's', color: '#2ecc71' }, { shape: 's', color: '#f1c40f' },
-				{ shape: 't', color: '#9b59b6' }, { shape: 't', color: '#e67e22' },
-				{ shape: 'c', color: '#1abc9c' }, { shape: 's', color: '#34495e' },
-				{ shape: 't', color: '#d35400' }, { shape: 's', color: '#7f8c8d' },
-				{ shape: 'c', color: '#ff00ff' }, { shape: 's', color: '#00ffff' },
-				{ shape: 't', color: '#ffffff' }, { shape: 'c', color: '#000000' }
-			];
+            shuffle(modelsDisponibles);
+            this.pairs = Math.min(this.pairs, modelsDisponibles.length); 
 
-			shuffle(modelsDisponibles);
-			
-			// IMPORTANT: Calcula quantes parelles realment caben
-			let nPairsReals = Math.min(this.pairs, modelsDisponibles.length);
-			
-			// Forcem que this.pairs reflecteixi el que realment dibuixarem
-			this.pairs = nPairsReals; 
+            let tauler = [];
+            modelsDisponibles.slice(0, this.pairs).forEach(model => {
+                for (let i = 0; i < this.groupSize; i++) {
+                    tauler.push({ ...model });
+                }
+            });
 
-			let seleccionats = modelsDisponibles.slice(0, this.pairs);
-			let tauler = [];
-
-			seleccionats.forEach(model => {
-				for (let i = 0; i < this.groupSize; i++) {
-					tauler.push({ ...model });
-				}
-			});
-
-			this.items = tauler;
-			shuffle(this.items);
-			this.states = new Array(this.items.length).fill(StateCard.DISABLE);
-			
-			console.log("Tauler generat amb items:", this.items.length);
-		}
-		gameStates = this.states;
-		gameItems = this.items;
-	},
+            this.items = tauler;
+            shuffle(this.items);
+            this.states = new Array(this.items.length).fill(StateCard.DISABLE);
+        }
+        gameStates = this.states;
+        gameItems = this.items;
+    },
 
     start: function() {
         this.ready = 0;
@@ -133,84 +138,83 @@ var game = {
     },
 
     click: function(indx) {
-		if (this.states[indx] !== StateCard.ENABLE || this.ready < this.items.length) return;
-		if (this.selectedCards.includes(indx)) return;
+        if (this.states[indx] !== StateCard.ENABLE || this.ready < this.items.length) return;
+        if (this.selectedCards.includes(indx)) return;
 
-		this.goFront(indx);
-		this.selectedCards.push(indx);
+        this.goFront(indx);
+        this.selectedCards.push(indx);
 
-		if (this.selectedCards.length < this.groupSize) return;
+        if (this.selectedCards.length < this.groupSize) return;
 
-		let primeraCarta = this.items[this.selectedCards[0]];
-		let match = this.selectedCards.every(idx => {
-			return this.items[idx].shape === primeraCarta.shape && 
-				   this.items[idx].color === primeraCarta.color;
-		});
-
-		if (match) {
-			this.selectedCards.forEach(i => this.states[i] = StateCard.DONE);
-			const cartesRestants = this.states.filter(s => s !== StateCard.DONE).length;
-			this.selectedCards = [];
-			
-			if (cartesRestants === 0) {
-				// USAR => AQUÍ TAMBÉ PER SEGURETAT
-				setTimeout(() => {
-					if (this.mode === "infinite") {
-						alert(`Nivell ${this.level} superat!`);
-						this.upgradeDifficulty();
-						this.select();
-						if (this.onLevelUp) this.onLevelUp(); 
-						this.start();
-					} else {
-						alert(`Has guanyat amb ${this.score} punts!`);
-						window.location.assign("../");
-					}
-				}, 500);
-			}
-		} else {
-			this.ready = 0;
-			// CANVI CRÍTIC: Passem de function() a () =>
-			setTimeout(() => {
-				// Ara 'this' sí que es refereix al 'game'
-				this.selectedCards.forEach(i => this.goBack(i));
-				
-				console.log("Punts abans:", this.score);
-				this.score -= this.penalty; 
-				console.log("Punts després:", this.score);
-
-				this.selectedCards = [];
-				this.ready = this.items.length;
-
-				if (this.score <= 0) {
-					alert(`Has mort al nivell ${this.level}.`);
-					window.location.assign("../");
-				}
-			}, 700);
-		}
-	},
-
-    save: function() {
-        let to_save = JSON.stringify({
-            items: this.items,
-            states: this.states,
-            lastCard: this.selectedCards,
-            groupSize: this.groupSize,
-            score: this.score,
-            pairs: this.pairs,
-            level: this.level,
-            mode: this.mode
+        let primeraCarta = this.items[this.selectedCards[0]];
+        let match = this.selectedCards.every(idx => {
+            return this.items[idx].shape === primeraCarta.shape && 
+                   this.items[idx].color === primeraCarta.color;
         });
-        localStorage.save = to_save;
-        window.location.assign("../");
-    }
-}; // Tanquem l'objecte game correctament
 
-// Funció shuffle corregida (estava mal escrita com a "shuffe")
+        if (match) {
+            this.selectedCards.forEach(i => this.states[i] = StateCard.DONE);
+            const cartesRestants = this.states.filter(s => s !== StateCard.DONE).length;
+            this.selectedCards = [];
+            if (this.mode === "infinite") this.score += (10 * this.groupSize);
+
+            if (cartesRestants === 0) {
+                setTimeout(() => {
+                    if (this.mode === "infinite") {
+                        alert(`Nivell ${this.level} superat!`);
+                        this.upgradeDifficulty();
+                        this.select();
+                        if (this.onLevelUp) this.onLevelUp(); 
+                        this.start();
+                    } else {
+                        alert(`Has guanyat!`);
+                        window.location.assign("../");
+                    }
+                }, 500);
+            }
+        } else {
+            this.ready = 0;
+            setTimeout(() => {
+                this.selectedCards.forEach(i => this.goBack(i));
+                
+                if (this.mode === "infinite") {
+                    this.lives--;
+                    if (this.lives <= 0) {
+                        this.manageGameOver();
+                        return;
+                    }
+                } else {
+                    this.score -= this.penalty;
+                    if (this.score <= 0) {
+                        alert("Has mort!");
+                        window.location.assign("../");
+                    }
+                }
+                this.selectedCards = [];
+                this.ready = this.items.length;
+            }, 700);
+        }
+    },
+
+    manageGameOver: function() {
+        let finalScore = this.score;
+        let nomFinal = localStorage.getItem('player_name') || "Anònim";
+
+        let ranking = JSON.parse(localStorage.getItem('memory_ranking')) || [];
+        ranking.push({ name: nomFinal, score: finalScore });
+        ranking.sort((a, b) => b.score - a.score);
+        ranking = ranking.slice(0, 5); 
+        
+        localStorage.setItem('memory_ranking', JSON.stringify(ranking));
+        alert(`FI DEL JOC!\nJugador: ${nomFinal}\nPuntuació: ${finalScore}`);
+        window.location.assign("../index.html");
+    }
+};
+
 function shuffle(arr) {
     arr.sort(() => Math.random() - 0.5);
 }
 
-// Exportacions de les funcions per al canvasgame.js
 export function selectCards() { game.select(); }
 export function clickCard(indx) { game.click(indx); }
 export function startGame() { game.start(); }
@@ -218,6 +222,7 @@ export function initCard(callback) {
     if (!game.setValue) game.setValue = [];
     game.setValue.push(callback);
 }
-export function saveGame() { game.save(); }
+export function saveGame() { game.save(); } // EXPORTEM EL GUARDAT
 export function setLevelUpCallback(cb) { game.onLevelUp = cb; }
+window.debugGame = game;
 window.debugGame = game;
