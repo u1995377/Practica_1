@@ -1,8 +1,6 @@
 import {$} from "../library/jquery-4.0.0.slim.module.min.js";
 
 var alies;
-
-// Crear elements del menú
 var body = $('body');
 body.append('<h1 id="title">Menú</h1>');
 body.append('<button id="play" class="center"> Jugar </button>');
@@ -10,7 +8,6 @@ body.append('<button id="options" class="center"> Opcions </button>');
 body.append('<button id="saves" class="center"> Partides </button>');
 body.append('<button id="exit" class="center"> Sortir </button>');
 
-// --- SECCIÓ RÀNQUING ---
 body.append('<div id="ranking-container" style="margin-top: 40px; text-align: center; font-family: Arial, sans-serif;"></div>');
 var rankingContainer = $('#ranking-container');
 rankingContainer.append('<h3>🏆 Top 5 Rànquing (Mode Infinit)</h3>');
@@ -41,8 +38,6 @@ function drawRanking() {
 
 drawRanking();
 
-// --- LOGICA DELS BOTONS ---
-
 $('#play').on('click', function(){
     sessionStorage.removeItem('load'); // Netejem si hi havia alguna càrrega prèvia
     alies = window.prompt("Introdueix el teu àlies de jugador:", "Jugador1");
@@ -58,15 +53,12 @@ $('#options').on('click', function(){
 });
 
 $('#saves').on('click', function(){
-    // LLEGIR PARTIDA LOCAL
     let savedData = localStorage.getItem('memory_save_game');
 
     if (!savedData) {
         alert("No hi ha cap partida guardada en aquest navegador.");
         return;
     }
-
-    // Preparem la càrrega per al fitxer memory.js
     sessionStorage.setItem('load', savedData);
     alert("Carregant partida guardada...");
     window.location.assign("./html/canvasgame.html");

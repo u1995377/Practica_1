@@ -4,7 +4,6 @@ import {
     initCard, saveGame, gameStates, setLevelUpCallback 
 } from "./memory.js";
 
-// --- CONFIGURACIÓ I VARIABLES ---
 let game = $('#game');
 let canvas = game[0].getContext('2d');
 let cards = []; 
@@ -20,27 +19,17 @@ let idxSel = -1;
 const SVG_W = 100;
 const SVG_H = 140;
 
-// --- INICIALITZACIÓ ---
 if (canvas) {
-    // 0. GENERACIÓ DINÀMICA DE BOTONS (Novetat)
     setupUI();
-
-    // Ajustem el tamany del canvas
     game.attr("width", 1000);
     game.attr("height", 800);
-    
-    // 1. Preparem les dades del joc
     selectCards(); 
-    
-    // 2. CONFIGURACIÓ DEL CALLBACK DE NIVELL
     setLevelUpCallback(async () => {
         console.log("Pujant de nivell: regenerant gràfics...");
         await initGameGraphics(); 
         setupCards();             
         idxSel = -1;             
     });
-
-    // 3. Càrrega inicial del joc
     initGameGraphics().then(() => {
         setupCards(); 
         startGame();  
@@ -48,16 +37,12 @@ if (canvas) {
     });
 }
 
-// --- FUNCIÓ PER GENERAR ELS BOTONS AMB JQUERY ---
 function setupUI() {
-    // Creem un contenidor per als botons
     let uiContainer = $('<div id="ui-controls"></div>').css({
         'margin-bottom': '15px',
         'display': 'flex',
         'gap': '10px'
     });
-
-    // Botó Guardar
     let btnSave = $('<button id="btnSave">💾 Guardar Partida (Esc)</button>').css({
         'padding': '10px 20px',
         'background-color': '#2ecc71',
@@ -68,8 +53,6 @@ function setupUI() {
         'font-weight': 'bold',
         'font-family': 'sans-serif'
     });
-
-    // Botó Sortir
     let btnExit = $('<button id="btnExit">🚪 Sortir al Menú</button>').css({
         'padding': '10px 20px',
         'background-color': '#e74c3c',
@@ -80,12 +63,8 @@ function setupUI() {
         'font-weight': 'bold',
         'font-family': 'sans-serif'
     });
-
-    // Injectem els botons abans del canvas
     uiContainer.append(btnSave).append(btnExit);
     game.before(uiContainer);
-
-    // Accions dels botons
     btnSave.on('click', () => saveGame());
     btnExit.on('click', () => {
         if(confirm("Vols sortir al menú? El progrés no guardat es perdrà.")) {
@@ -94,7 +73,6 @@ function setupUI() {
     });
 }
 
-// --- GENERADOR DE GRÀFICS (SVG a Imatge) ---
 async function initGameGraphics() {
     backImage = await createSVGImage({ shape: 'pattern', color: '#444' }, SVG_W, SVG_H);
     cardImages = await Promise.all(
@@ -138,21 +116,16 @@ function generateSVGCode(config, width, height) {
     return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">${svgElement}</svg>`;
 }
 
-// --- LÒGICA VISUAL I EVENTS ---
 function setupCards() {
     const columnes = gameItems.length > 12 ? 8 : 6; 
     const margreX = 50;
     const margreY = 50;
-
     cards = gameItems.map((item, indx) => {
         let col = indx % columnes;
         let fila = Math.floor(indx / columnes);
-
         const xMin = margreX + (c_w + 15) * col;
         const yMin = margreY + (c_h + 15) * fila;
-
         initCard(() => { }); 
-
         return {
             position: { xMin, xMax: xMin + c_w, yMin, yMax: yMin + c_h },
             onClick: function(x, y) {
@@ -161,14 +134,12 @@ function setupCards() {
             }
         };
     });
-
     game.off('click').on('click', function(e) {
         const rect = this.getBoundingClientRect();
         e_click.click = true;
         e_click.x = e.clientX - rect.left;
         e_click.y = e.clientY - rect.top;
     });
-
     $(document).off('keydown').on('keydown', e => {
         key = e.key;
         if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) {
@@ -180,12 +151,10 @@ function setupCards() {
 function draw() {
     if (!backImage || cardImages.length !== gameItems.length) return;
     canvas.clearRect(0, 0, game.attr("width"), game.attr("height"));
-    
     cards.forEach((card, i) => {
         const x = card.position.xMin;
         const y = card.position.yMin;
         const state = gameStates[i];
-
         if (state === 1) { 
             canvas.drawImage(backImage, x, y, c_w, c_h);
         } else { 
@@ -193,7 +162,6 @@ function draw() {
                 canvas.drawImage(cardImages[i], x, y, c_w, c_h);
             }
         }
-
         if (i === idxSel) {
             canvas.strokeStyle = "#FFD700";
             canvas.lineWidth = 4;
@@ -217,7 +185,6 @@ function checkInput() {
         });
         e_click.click = false;
     }
-    
     if (key) {
         switch(key) {
             case "Escape": saveGame(); break;

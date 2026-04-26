@@ -48,8 +48,6 @@ var game = {
         }
         this.visualTime = Math.max(200, this.visualTime - 100);
     },
-
-    // FUNCIÓ DE GUARDAT LOCAL
     save: function() {
         let estatAConservar = {
             items: this.items,
@@ -69,21 +67,16 @@ var game = {
 
     select: function() {
         this.setValue = []; 
-        
-        // SISTEMA DE CÀRREGA
         if (sessionStorage.getItem('load')) {
             let toLoad = JSON.parse(sessionStorage.getItem('load'));
-            // Substituïm totes les propietats de 'game' per les guardades
             Object.assign(this, toLoad);
-            sessionStorage.removeItem('load'); // Netegem després de carregar
+            sessionStorage.removeItem('load');
         } else {
-            // Inicialització normal si no hi ha càrrega
             if (!this.initialized) {
                 const modeLlegit = sessionStorage.getItem('gameMode');
                 this.mode = modeLlegit === "infinite" ? "infinite" : "normal";
                 this.initialized = true; 
             }
-
             if (this.mode === "normal") {
                 this.groupSize = parseInt(sessionStorage.getItem('groupSize')) || 2;
                 this.pairs = parseInt(sessionStorage.getItem('pairs')) || 2;
@@ -94,7 +87,6 @@ var game = {
                 this.score = 0;
                 this.lives = 3;
             }
-
             const modelsDisponibles = [
                 { shape: 'c', color: '#3498db' }, { shape: 'c', color: '#e74c3c' },
                 { shape: 's', color: '#2ecc71' }, { shape: 's', color: '#f1c40f' },
@@ -104,7 +96,6 @@ var game = {
                 { shape: 'c', color: '#ff00ff' }, { shape: 's', color: '#00ffff' },
                 { shape: 't', color: '#ffffff' }, { shape: 'c', color: '#000000' }
             ];
-
             shuffle(modelsDisponibles);
             this.pairs = Math.min(this.pairs, modelsDisponibles.length); 
 
@@ -114,7 +105,6 @@ var game = {
                     tauler.push({ ...model });
                 }
             });
-
             this.items = tauler;
             shuffle(this.items);
             this.states = new Array(this.items.length).fill(StateCard.DISABLE);
@@ -222,6 +212,7 @@ export function initCard(callback) {
     if (!game.setValue) game.setValue = [];
     game.setValue.push(callback);
 }
+
 export function saveGame() { game.save(); } // EXPORTEM EL GUARDAT
 export function setLevelUpCallback(cb) { game.onLevelUp = cb; }
 window.debugGame = game;
